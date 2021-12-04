@@ -1,10 +1,10 @@
 import java.util.*;
 
-class Sat {
+class CNF {
     public ArrayList<int[]> clauses;
     public int N; // Number of literals
 
-    public Sat() {
+    public CNF() {
         clauses = new ArrayList<int[]>();
         N = 0;
     }
@@ -64,7 +64,7 @@ class Sat {
      * @param NClauses Number of clauses to create
      * @param seed Seed to use for repeatability
      */
-    public void makeRandom3Sat(int NLiterals, int NClauses, long seed) {
+    public void makeRandom3CNF(int NLiterals, int NClauses, long seed) {
         Random r = new Random();
         r.setSeed(seed);
         int[] index = new int[3];
@@ -146,6 +146,13 @@ class Sat {
     }
     
 
+    /**
+     * Helper for brute force solving
+     * 
+     * @param vals Array of assignments of literals in working memory
+     * @param index Index of current literal we're examining
+     * @return Whether the clauses are satisfiable given the choices up to this index
+     */
     public boolean bruteSolveRec(boolean[] vals, int index) {
         boolean res = false;
         if (index == N) {
@@ -168,7 +175,8 @@ class Sat {
     /**
      * Try every possible assignment and return true
      * Use a memory efficient in-place version of depth-first search
-     * @return Whether there is an assignment
+     * @return The assignment of literals that satisfies the clauses,
+     *         or null if they are not satisfiable
      */
     public boolean[] bruteSolve() {
         boolean[] vals = new boolean[N];
@@ -185,7 +193,7 @@ class Sat {
      * Test out the example in 7.33
      */
     public static void bookTest() {
-        Sat s = new Sat();
+        CNF s = new CNF();
         // (x0 V x0 V x1) ^ (not x0 V not x1 V not x1) ^ (not x0 V x1 V x1) 
         int[] c1 = {0, 0, 1};
         boolean[] d1 = {true, true, true};
@@ -213,7 +221,7 @@ class Sat {
     
     public static void Example1() {
         // (x0 V not x1 V x2) ^ (x0 V x1 V x2) ^ (not x0 V not x1 V not x2) ^ (not x0)
-        Sat s = new Sat();
+        CNF s = new CNF();
         int[] c1 = {0, 1, 2};
         boolean[] d1 = {true, false, true};
         s.addClause(c1, d1);
@@ -251,8 +259,8 @@ class Sat {
     
     public static void testRandomClauses() {
         for (long seed = 0; seed < 100; seed++) {
-            Sat s = new Sat();
-            s.makeRandom3Sat(5, 40, seed);
+            CNF s = new CNF();
+            s.makeRandom3CNF(5, 40, seed);
             boolean[] vals = s.bruteSolve();
             //System.out.println(s);
             if (vals != null) {
