@@ -2,7 +2,7 @@ import java.util.*;
 
 class Sat {
     public ArrayList<int[]> clauses;
-    public int N; // Number of variables
+    public int N; // Number of literals
 
     public Sat() {
         clauses = new ArrayList<int[]>();
@@ -10,6 +10,7 @@ class Sat {
     }
     
     public String toString() {
+        String s = "";
         for (int i = 0; i < clauses.size(); i++) {
             s += "(";
             int[] clause = clauses.get(i);
@@ -36,8 +37,8 @@ class Sat {
     /**
      * Add a clause to the expression
      * 
-     * @param index An array of indices of the variables that are involved
-     * @param pos True if the variable itself shows up, false if its
+     * @param index An array of indices of the literals that are involved
+     * @param pos True if the literal itself shows up, false if its
      *            complement shows up
      */
     public void addClause(int[] index, boolean[] pos) {
@@ -55,11 +56,33 @@ class Sat {
         clauses.add(clause);
     }
     
+
     /**
-     * Check an assignment of the variables to see if it satisfies
+     * Generate a random 3-sat clause
+     * 
+     * @param NLiterals Number of literals to use
+     * @param NClauses Number of clauses to create
+     * @param seed Seed to use for repeatability
+     */
+    public void makeRandom3Sat(int NLiterals, int NClauses, long seed) {
+        Random r = new Random();
+        r.setSeed(seed);
+        int[] index = new int[3];
+        boolean[] pos = new boolean[3];
+        for (int i = 0; i < NClauses; i++) {
+            for (int j = 0; j < 3; j++) {
+                index[j] = r.nextInt(NLiterals);
+                pos[j] = r.nextBoolean();
+            }
+            addClause(index, pos);
+        }
+    }
+
+    /**
+     * Check an assignment of the literals to see if it satisfies
      * the clauses. (This overloaded version can print debugging info)
      * 
-     * @param vals An array of the assignments of each variable
+     * @param vals An array of the assignments of each literal
      * @param verbose Whether to print a bunch of info
      * @return Whether this assignment satisfies the clauses
      */
@@ -112,35 +135,50 @@ class Sat {
     }
     
     /**
-     * Check an assignment of the variables to see if it satisfies
+     * Check an assignment of the literals to see if it satisfies
      * the clauses. (This overloaded version can print debugging info)
      * 
-     * @param vals An array of the assignments of each variable
+     * @param vals An array of the assignments of each literal
      * @return Whether this assignment satisfies the clauses
      */
     public boolean isSatisfied(boolean[] vals) {
         return isSatisfied(vals, false);
     }
     
-    /**
-     * Try every possible assignment and return true
-     * @return Whether there is an assignment
-     */
-    public boolean bruteSolve() {
+
+    public boolean bruteSolveRec(boolean[] vals, int index) {
         boolean res = false;
-        boolean finished = false;
-        boolean[] aa = new boolean[N];
-        for (int i = 0; i < N; i++) {
-            aa[i] = false;
+        if (index == N) {
+            res = isSatisfied(vals);
         }
-        while (!finished && !res) {
-            // Do binary addition to get to the next
-            int k = 0;
-            while (k < N) {
-                
+        else {
+            if (bruteSolveRec(vals, index+1)) {
+                res = true;
+            }
+            else {
+                vals[index] = !vals[index];
+                if (bruteSolveRec(vals, index+1)) {
+                    res = true;
+                }
             }
         }
         return res;
+    }
+
+    /**
+     * Try every possible assignment and return true
+     * Use a memory efficient in-place version of depth-first search
+     * @return Whether there is an assignment
+     */
+    public boolean[] bruteSolve() {
+        boolean[] vals = new boolean[N];
+        for (int i = 0; i < N; i++) {
+            vals[i] = false;
+        }
+        if (!bruteSolveRec(vals, 0)) {
+            vals = null;
+        }
+        return vals;
     }
     
     /**
@@ -158,6 +196,7 @@ class Sat {
         int[] c3 = {0, 1, 1};
         boolean[] d3 = {false, true, true};
         s.addClause(c3, d3);
+        System.out.println("");
         boolean x0 = true, x1 = true;
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
@@ -188,6 +227,10 @@ class Sat {
         boolean[] d4 = {false};
         s.addClause(c4, d4);
         System.out.println(s);
+        boolean[] res = s.bruteSolve();
+        for (int i = 0; i < res.length; i++) {
+            System.out.print(res[i] + ", ");
+        }
         boolean x0 = true, x1 = true, x2 = true;
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
@@ -206,7 +249,23 @@ class Sat {
         }
     }
     
+    public static void testRandomClauses() {
+        for (long seed = 0; seed < 100; seed++) {
+            Sat s = new Sat();
+            s.makeRandom3Sat(5, 40, seed);
+            boolean[] vals = s.bruteSolve();
+            //System.out.println(s);
+            if (vals != null) {
+                System.out.println("Should be satisfied: " + s.isSatisfied(vals));
+            }
+            else {
+                System.out.println("Not satisfiable");
+            }
+        }
+
+    }
+
     public static void main(String[] args) {
-        Example1();
+        testRandomClauses();
     }
 }
