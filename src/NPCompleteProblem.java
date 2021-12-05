@@ -47,7 +47,7 @@ public class NPCompleteProblem {
      * @return true if vals transformed into the problem is a solution
      *         to the problem
      */
-    public boolean verifyCNFCertificate(boolean[] vals) {
+    public boolean certificateSatisfies(Certificate cert) {
         return false;
     }
 
