@@ -25,6 +25,7 @@ public class HamiltonianPathCert extends Certificate {
                 path[i] = j;
             }
         }
+        NPCompleteProblem.printArray(path);
     }
 
     public void draw() {
@@ -37,7 +38,8 @@ public class HamiltonianPathCert extends Certificate {
         StdDraw.setPenColor(StdDraw.RED);
         for (int i = 0; i < N-1; i++) {
             if (path[i] > -1 && path[i+1] > -1) {
-                StdDraw.line(X[i][0], X[i][1], X[i+1][0], X[i+1][1]);
+                StdDraw.line(X[path[i]][0], X[path[i]][1], 
+                             X[path[i+1]][0], X[path[i+1]][1]);
             }
         }
     }
