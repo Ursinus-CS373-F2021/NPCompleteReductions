@@ -153,18 +153,18 @@ class CNF {
      * @param index Index of current literal we're examining
      * @return Whether the clauses are satisfiable given the choices up to this index
      */
-    public boolean bruteSolveRec(boolean[] vals, int index) {
+    public boolean solveBruteRec(boolean[] vals, int index) {
         boolean res = false;
         if (index == N) {
             res = isSatisfied(vals);
         }
         else {
-            if (bruteSolveRec(vals, index+1)) {
+            if (solveBruteRec(vals, index+1)) {
                 res = true;
             }
             else {
                 vals[index] = !vals[index];
-                if (bruteSolveRec(vals, index+1)) {
+                if (solveBruteRec(vals, index+1)) {
                     res = true;
                 }
             }
@@ -178,15 +178,184 @@ class CNF {
      * @return The assignment of literals that satisfies the clauses,
      *         or null if they are not satisfiable
      */
-    public boolean[] bruteSolve() {
+    public boolean[] solveBrute() {
         boolean[] vals = new boolean[N];
         for (int i = 0; i < N; i++) {
             vals[i] = false;
         }
-        if (!bruteSolveRec(vals, 0)) {
+        if (!solveBruteRec(vals, 0)) {
             vals = null;
         }
         return vals;
+    }
+
+    public class DPLLState {
+        private boolean satisfiable;
+        private ArrayList<int[]> clauses; // Clauses that are left
+        private ArrayList<Integer> literals; // Literals that are left
+        private HashMap<Integer, Boolean> model; // Literals that have been assigned
+        public DPLLState() {
+            satisfiable = true; // Yet to be proven unsatisfiable
+        }
+    }
+
+    public DPLLState DPLL(DPLLState state) {
+        boolean anyFalse = false;
+        int numTrueClauses = 0;
+        int i = 0;
+        // Keep track of clauses that need to be solved still
+        ArrayList<int[]> clausesNext = new ArrayList<int[]>();
+        while (i < state.clauses.size() && !anyFalse) {
+            ArrayList<Integer> newClause = new ArrayList<Integer>();
+            int[] clause = state.clauses.get(i);
+            boolean clauseTrue = false;
+            int totalTerms = 0; // Total literals that have been assigned in this clause
+            int falseTerms = 0; // Number of assigned literals that are mismatched in this clause
+            int k = 0;
+            while(!clauseTrue && k < clause.length) {
+                int idx = clause[k];
+                boolean val = true;
+                if (idx < 0) {
+                    val = false;
+                    idx *= -1;
+                }
+                idx--;
+                if (state.model.containsKey(idx)) {
+                    totalTerms++;
+                    if (state.model.get(idx) == val) {
+                        clauseTrue = true;
+                        numTrueClauses++;
+                    }
+                    else {
+                        falseTerms++;
+                    }
+                }
+                else {
+                    newClause.add(clause[k]); // Keep track of unassigned literals
+                }
+            }
+            if (falseTerms == clause.length) {
+                // If all of the literals in a clause have been assigned in opposition
+                // with that clause, then the entire expression is false
+                anyFalse = true;
+            }
+            else if (!clauseTrue) {
+                // Test what's left of this clause at the next call
+                int[] nextClause = new int[newClause.size()];
+                for (k = 0; k < newClause.size(); k++) {
+                    nextClause[k] = newClause.get(k);
+                }
+                clausesNext.add(nextClause);
+            }
+            i++;
+        }
+        DPLLState ret = state;
+        if (anyFalse) {
+            // If a single clause is false in model, return false
+            state.satisfiable = false;
+        }
+        else if (numTrueClauses != state.clauses.size() && state.literals.size() > 0) {
+            // If not all of the clauses have been shown to be true yet, 
+            // and there are still literals left to try, then we have to keep trying things
+            ret = new DPLLState();
+            ret.literals = (ArrayList<Integer>)state.literals.clone();
+            ret.model = (HashMap<Integer, Boolean>)state.model.clone();
+            ret.clauses = clausesNext;
+
+            // Step 1: Find pure symbols
+            boolean[] pure = new boolean[N];
+            int[] pureStatus = new int[N];
+            for (i = 0; i < N; i++) {
+                pure[i] = true;
+                pureStatus[i] = -1;
+            }
+            for (i = 0; i < ret.clauses.size(); i++) {
+                int[] clause = ret.clauses.get(i);
+                for (int k = 0; k < clause.length; k++) {
+                    int idx = clause[k];
+                    boolean val = true;
+                    if (idx < 0) {
+                        val = false;
+                        idx *= -1;
+                    }
+                    idx--;
+                    if (pureStatus[idx] == -1) {
+                        pureStatus[idx] = val?0:1;
+                    }
+                    else if (pure[idx]) {
+                        if (val != (pureStatus[idx] == 1)) {
+                            pure[idx] = false;
+                        }
+                    }
+                }
+            }
+            // Step 2: Assign pure symbols
+            int numPure = 0;
+            for (i = 0; i < N; i++) {
+                if (pure[i]) {
+                    numPure++;
+                    ret.model.put(i, pureStatus[i] == 1);
+                    // Want to remove this literal itself, not index i
+                    ret.literals.remove((Integer)i); 
+                }
+            }
+            // Step 3: Find a unit clause and put the first one into the model
+            i = 0;
+            boolean foundUnit = false;
+            while (i < ret.clauses.size() && !foundUnit) {
+                if (ret.clauses.get(i).length == 1) {
+                    foundUnit = true;
+                    int idx = ret.clauses.get(i)[0];
+                    boolean val = true;
+                    if (idx < 0) {
+                        val = false;
+                        idx *= -1;
+                    }
+                    idx--;
+                    ret.model.put(idx, val);
+                    ret.literals.remove(idx);
+                }
+            }
+            if (numPure > 0 || foundUnit) {
+                ret = DPLL(ret);
+            }
+            else {
+                // Pick the first unused literal (at index 0) and try both options
+                int idx = ret.literals.remove(0);
+                ret.model.put(idx, false);
+                DPLLState tryFalse = DPLL(ret);
+                if (tryFalse.satisfiable) {
+                    ret = tryFalse;
+                }
+                else {
+                    ret.model.put(idx, true);
+                    ret = DPLL(ret);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public boolean[] solveDPLL() {
+        boolean[] res = null;
+        DPLLState state = new DPLLState();
+        state.clauses = clauses;
+        state.literals = new ArrayList<Integer>();
+        for (int i = 0; i < N; i++) {
+            state.literals.add(i);
+        }
+        state.model = new HashMap<Integer, Boolean>();
+        DPLLState ret = DPLL(state);
+        if (ret.satisfiable) {
+            res = new boolean[N];
+            for (int i = 0; i < N; i++) {
+                res[i] = true; // Assign as true by default, unless specified otherwise
+            }
+            for (int i: ret.model.keySet()) {
+                res[i] = ret.model.get(i);
+            }
+        }
+        return res;
     }
     
     /**
@@ -235,7 +404,7 @@ class CNF {
         boolean[] d4 = {false};
         s.addClause(c4, d4);
         System.out.println(s);
-        boolean[] res = s.bruteSolve();
+        boolean[] res = s.solveBrute();
         for (int i = 0; i < res.length; i++) {
             System.out.print(res[i] + ", ");
         }
@@ -261,7 +430,7 @@ class CNF {
         for (long seed = 0; seed < 100; seed++) {
             CNF s = new CNF();
             s.makeRandom3CNF(5, 40, seed);
-            boolean[] vals = s.bruteSolve();
+            boolean[] vals = s.solveDPLL();
             //System.out.println(s);
             if (vals != null) {
                 System.out.println("Should be satisfied: " + s.isSatisfied(vals));
