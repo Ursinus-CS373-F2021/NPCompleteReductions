@@ -211,11 +211,11 @@ public class HamiltonianPath extends GraphProblem {
 
     public static void main(String[] args) {
         HamiltonianPath h = new HamiltonianPath();
-        int N = 6;
+        int N = 20;
         h.makeRandomProblem(N, 9);
         CNF c = h.getCNF();
         System.out.println(c);
-        boolean[] vals = c.solveBrute();
+        boolean[] vals = c.solveDPLL();
         HamiltonianPathCert cert = new HamiltonianPathCert(vals, N);
         h.draw();
         cert.draw();

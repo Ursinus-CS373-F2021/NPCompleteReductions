@@ -202,13 +202,19 @@ class CNF {
             satisfiable = true; // Yet to be proven unsatisfiable
         }
         public String toString() {
-            return getClausesString(clauses);
+            String s = getClausesString(clauses) + "\n";
+            for (int i: model.keySet()) {
+                s += "x" + i + "=" + model.get(i) + ", ";
+            }
+            s += "\nLiteralsLeft: ";
+            for (int i = 0; i < literals.size(); i++) {
+                s += literals.get(i) + ",";
+            }
+            return s;
         }
     }
 
     public DPLLState DPLL(DPLLState state) {
-        System.out.println(state);
-        System.out.flush();
         boolean anyFalse = false;
         int numTrueClauses = 0;
         int i = 0;
@@ -302,7 +308,7 @@ class CNF {
             // Step 2: Assign pure symbols
             int numPure = 0;
             for (i = 0; i < N; i++) {
-                if (pure[i]) {
+                if (pure[i] && pureStatus[i] > -1) {
                     numPure++;
                     ret.model.put(i, pureStatus[i] == 1);
                     // Want to remove this literal itself, not index i
@@ -323,7 +329,8 @@ class CNF {
                     }
                     idx--;
                     ret.model.put(idx, val);
-                    ret.literals.remove(idx);
+                    // Want to remove this literal itself, not index i
+                    ret.literals.remove((Integer)idx);
                 }
                 i++;
             }
