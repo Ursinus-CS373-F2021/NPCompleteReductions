@@ -162,8 +162,8 @@ public class HamiltonianPath extends GraphProblem {
     }
 
     /**
-     * Add the clauses that enforce that two nodes at adjacnet
-     * time indices must be connected by an edge
+     * Add the clauses that enforce that two nodes at adjacent
+     * time indices must be connected by an (undirected) edge
      * 
      * xij -> !x_{i+1}k for i = 1, ..., n-1 and (j, k) not an edge
      * This is equivalent to (!xij or !x_{i+1}k) if (j, k) is not an edge
@@ -180,6 +180,9 @@ public class HamiltonianPath extends GraphProblem {
                     if (!edgeSet.contains(s)) {
                         index[0] = i*N + j;
                         index[1] = (i+1)*N+k;
+                        c.addClause(index, pos);
+                        index[0] = i*N + k;
+                        index[1] = (i+1)*N+j;
                         c.addClause(index, pos);
                     }
                 }
@@ -208,11 +211,11 @@ public class HamiltonianPath extends GraphProblem {
 
     public static void main(String[] args) {
         HamiltonianPath h = new HamiltonianPath();
-        int N = 5;
-        h.makeRandomProblem(N, 2);
+        int N = 6;
+        h.makeRandomProblem(N, 9);
         CNF c = h.getCNF();
         System.out.println(c);
-        boolean[] vals = c.bruteSolve();
+        boolean[] vals = c.solveBrute();
         HamiltonianPathCert cert = new HamiltonianPathCert(vals, N);
         h.draw();
         cert.draw();
