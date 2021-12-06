@@ -1,15 +1,7 @@
 import java.util.*;
 
 class CNF {
-    public ArrayList<int[]> clauses;
-    public int N; // Number of literals
-
-    public CNF() {
-        clauses = new ArrayList<int[]>();
-        N = 0;
-    }
-    
-    public String toString() {
+    public static String getClausesString(ArrayList<int[]> clauses) {
         String s = "";
         for (int i = 0; i < clauses.size(); i++) {
             s += "(";
@@ -32,6 +24,18 @@ class CNF {
             }
         }
         return s;
+    }
+
+    public ArrayList<int[]> clauses;
+    public int N; // Number of literals
+
+    public CNF() {
+        clauses = new ArrayList<int[]>();
+        N = 0;
+    }
+    
+    public String toString() {
+        return getClausesString(clauses);
     }
     
     /**
@@ -197,9 +201,14 @@ class CNF {
         public DPLLState() {
             satisfiable = true; // Yet to be proven unsatisfiable
         }
+        public String toString() {
+            return getClausesString(clauses);
+        }
     }
 
     public DPLLState DPLL(DPLLState state) {
+        System.out.println(state);
+        System.out.flush();
         boolean anyFalse = false;
         int numTrueClauses = 0;
         int i = 0;
@@ -233,6 +242,7 @@ class CNF {
                 else {
                     newClause.add(clause[k]); // Keep track of unassigned literals
                 }
+                k++;
             }
             if (falseTerms == clause.length) {
                 // If all of the literals in a clause have been assigned in opposition
@@ -315,6 +325,7 @@ class CNF {
                     ret.model.put(idx, val);
                     ret.literals.remove(idx);
                 }
+                i++;
             }
             if (numPure > 0 || foundUnit) {
                 ret = DPLL(ret);
@@ -429,7 +440,7 @@ class CNF {
     public static void testRandomClauses() {
         for (long seed = 0; seed < 100; seed++) {
             CNF s = new CNF();
-            s.makeRandom3CNF(5, 40, seed);
+            s.makeRandom3CNF(4, 10, seed);
             boolean[] vals = s.solveDPLL();
             //System.out.println(s);
             if (vals != null) {
