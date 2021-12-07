@@ -211,12 +211,19 @@ public class HamiltonianPath extends GraphProblem {
     }
 
     public static void main(String[] args) {
+        long tic, toc;
         HamiltonianPath h = new HamiltonianPath();
         int N = 20;
         h.makeRandomProblem(N, 9);
+        tic = System.currentTimeMillis();
         CNF c = h.getCNF();
-        System.out.println(c);
+        toc = System.currentTimeMillis();
+        System.out.println("Elapsed time making CNF clauses: " + (toc-tic));
+        //System.out.println(c);
+        tic = System.currentTimeMillis();
         boolean[] vals = c.solveDPLL();
+        toc = System.currentTimeMillis();
+        System.out.println("Elapsed time solving SAT: " + (toc-tic));
         HamiltonianPathCert cert = new HamiltonianPathCert(vals, N);
         h.draw();
         cert.draw();
