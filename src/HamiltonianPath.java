@@ -8,7 +8,7 @@ public class HamiltonianPath extends GraphProblem {
      * @return Your pseudonym
      */
     public String getPseudonym() {
-        return "C-Pain";
+        return "ctralie";
     }
 
     /**
@@ -20,7 +20,8 @@ public class HamiltonianPath extends GraphProblem {
     }
 
     /**
-     * Initialize a random problem of size N which has a solution
+     * Initialize a random graph with N nodes and O(N^(3/2)) edges
+     * that contains a Hamiltonian cycle
      * @param N Size of problem
      * @param seed Seed for repeatability
      */

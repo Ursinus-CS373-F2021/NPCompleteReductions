@@ -23,6 +23,10 @@ public class GraphProblem extends NPCompleteProblem {
         return s;
     }
 
+    /**
+     * Draw the vertices as dots evenly spaced on a circle and the edges
+     * as line segments between them
+     */
     public void draw() {
         double[][] X = new double[N][2];
         for (int i = 0; i < N; i++) {

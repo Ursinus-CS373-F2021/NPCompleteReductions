@@ -1,6 +1,11 @@
 import java.util.*;
 
 class CNF {
+    /**
+     * Devise a string representation of the CNF
+     * @param clauses List of clauses
+     * @return String representation of clauses
+     */
     public static String getClausesString(ArrayList<int[]> clauses) {
         String s = "";
         for (int i = 0; i < clauses.size(); i++) {
@@ -26,7 +31,7 @@ class CNF {
         return s;
     }
 
-    public ArrayList<int[]> clauses;
+    public ArrayList<int[]> clauses; // Clauses
     public int N; // Number of literals
 
     public CNF() {
@@ -193,8 +198,11 @@ class CNF {
         return vals;
     }
 
+    /**
+     * A class for keeping track of a particular branch of the DPLL computation
+     */
     public class DPLLState {
-        private boolean satisfiable;
+        private boolean satisfiable; // Whether it is still possible to satisfy 
         private ArrayList<int[]> clauses; // Clauses that are left
         private ArrayList<Integer> literals; // Literals that are left
         private HashMap<Integer, Boolean> model; // Literals that have been assigned
@@ -214,6 +222,12 @@ class CNF {
         }
     }
 
+    /**
+     * Recursively apply the DPLL algorithm to find an assignment of literals 
+     * making this true
+     * @param state Input current configuration of the problem
+     * @return A solution to the input configuration
+     */
     public DPLLState DPLL(DPLLState state) {
         boolean anyFalse = false;
         int numTrueClauses = 0;
@@ -224,7 +238,6 @@ class CNF {
             ArrayList<Integer> newClause = new ArrayList<Integer>();
             int[] clause = state.clauses.get(i);
             boolean clauseTrue = false;
-            int totalTerms = 0; // Total literals that have been assigned in this clause
             int falseTerms = 0; // Number of assigned literals that are mismatched in this clause
             int k = 0;
             while(!clauseTrue && k < clause.length) {
@@ -236,7 +249,6 @@ class CNF {
                 }
                 idx--;
                 if (state.model.containsKey(idx)) {
-                    totalTerms++;
                     if (state.model.get(idx) == val) {
                         clauseTrue = true;
                         numTrueClauses++;
@@ -354,6 +366,13 @@ class CNF {
         return ret;
     }
 
+    /**
+     * Use the DPLL algorithm to find an assignment of values to literals
+     * that makes the expression true
+     * 
+     * @return The assignment of literals that satisfies the clauses,
+     *         or null if they are not satisfiable
+     */
     public boolean[] solveDPLL() {
         boolean[] res = null;
         DPLLState state = new DPLLState();
