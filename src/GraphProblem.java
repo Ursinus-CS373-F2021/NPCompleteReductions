@@ -11,6 +11,24 @@ public class GraphProblem extends NPCompleteProblem {
     public GraphProblem() {
     }
 
+    /**
+     * Check to see whether an edge between two vertices 
+     * exists in this class
+     * @param i Index of first vertex
+     * @param j Index of second vertex
+     * @return Whether this edge is in the graph
+     */
+    public boolean containsEdge(int i, int j) {
+        String s = "";
+        if (i < j) {
+            s = i + "_" + j;
+        }
+        else {
+            s = j + "_" + i;
+        }
+        return edgeSet.contains(s);
+    }
+
     public String toString() {
         String s = "";
         for (int i = 0; i < edges.size(); i++) {

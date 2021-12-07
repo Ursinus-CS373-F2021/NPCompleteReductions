@@ -214,6 +214,16 @@ public class HamiltonianPath extends GraphProblem {
         return c;
     }
 
+    /**
+     * 
+     * @param vals CNF certificate (array of true/false values for each literal)
+     * @param N Problem size
+     * @return A certificate of type HamiltonianPathCert
+     */
+    public Certificate makeCertificateType(boolean[] vals, int N) {
+        return new HamiltonianPathCert(vals, N);
+    }
+
     public static void main(String[] args) {
         long tic, toc;
         HamiltonianPath h = new HamiltonianPath();
@@ -223,13 +233,16 @@ public class HamiltonianPath extends GraphProblem {
         CNF c = h.getCNF();
         toc = System.currentTimeMillis();
         System.out.println("Elapsed time making CNF clauses: " + (toc-tic));
-        //System.out.println(c);
+        System.out.println(c);
         tic = System.currentTimeMillis();
         boolean[] vals = c.solveDPLL();
         toc = System.currentTimeMillis();
         System.out.println("Elapsed time solving SAT: " + (toc-tic));
         HamiltonianPathCert cert = new HamiltonianPathCert(vals, N);
+        System.out.println("Satisfies: " + cert.satisfiesProblem(h));
         h.draw();
         cert.draw();
+        // Now test a bunch of other problems
+        h.testProblems(N, 5);
     }
 }

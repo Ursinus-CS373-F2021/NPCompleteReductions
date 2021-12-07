@@ -1,12 +1,15 @@
 public class Certificate {
     protected boolean[] vals;
+    protected int N;
 
     /**
      * Initialize a certificate from a CNF certificate
      * @param vals CNF certificate (array of true/false values for each literal)
+     * @param N Problem size
      */
-    public Certificate(boolean[] vals) {
+    public Certificate(boolean[] vals, int N) {
         this.vals = vals;
+        this.N = N;
     }
 
     /**

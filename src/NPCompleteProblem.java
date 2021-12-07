@@ -42,21 +42,31 @@ public class NPCompleteProblem {
     }
 
     /**
-     * 
-     * @param vals Assignment of CNF
-     * @return true if vals transformed into the problem is a solution
-     *         to the problem
+     * Used to initialize and return a certificate of the proper type
+     * @param vals CNF certificate (array of true/false values for each literal)
+     * @param N Problem size
+     * @return
      */
-    public boolean certificateSatisfies(Certificate cert) {
-        return false;
+    public Certificate makeCertificateType(boolean[] vals, int N) {
+        System.out.println("Warning: Calling makeCertificate on base class");
+        return null;
     }
 
-
     public void testProblems(int N, int numProblems) {
+        long tic, toc;
         for (long i = 0; i < numProblems; i++) {
+            System.out.println("\n\nSeed " + i + "\n--------------------------");
             makeRandomProblem(N, i);
+            tic = System.currentTimeMillis();
             CNF c = getCNF();
-            
+            toc = System.currentTimeMillis();
+            System.out.println("Elapsed time making CNF clauses: " + (toc-tic));
+            tic = System.currentTimeMillis();
+            boolean[] vals = c.solveDPLL();
+            toc = System.currentTimeMillis();
+            System.out.println("Elapsed time solving SAT: " + (toc-tic));
+            Certificate cert = makeCertificateType(vals, N);
+            System.out.println("Satisfied: " + cert.satisfiesProblem(this));
         }
     }
 

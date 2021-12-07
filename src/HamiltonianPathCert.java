@@ -1,16 +1,14 @@
 public class HamiltonianPathCert extends Certificate {
     private int[] path;
-    private int N;
 
     /**
      * 
      * @param vals SAT Certificate
-     * @param N Number of vertices in graph
+     * @param N Problem size
      */
-    public HamiltonianPathCert(boolean[] vals, int N){
-        super(vals);
+    public HamiltonianPathCert(boolean[] vals, int N) {
+        super(vals, N);
         // Convert into a hamiltonian path
-        this.N = N;
         path = new int[N];
         // Initialize as -1 values, which will indicate that no vertex
         // showed up at a particular position, which would be a violation
@@ -44,8 +42,22 @@ public class HamiltonianPathCert extends Certificate {
         }
     }
 
+    /**
+     * Implement a verifier to check whether this certificate actually
+     * solves the problem
+     * 
+     * @param npcproblem Graph in which we're checking the Hamiltonian path
+     * @return true if this certificate solves this Hamiltonian path, or
+     *         false otherwise
+     */
     public boolean satisfiesProblem(NPCompleteProblem npcproblem) {
-        HamiltonianPath problem = (HamiltonianPath)npcproblem;
-        return false;
+        HamiltonianPath graph = (HamiltonianPath)npcproblem;
+        boolean satisfies = true;
+        int idx = 0;
+        while (satisfies && idx < N-1) {
+            satisfies = satisfies && graph.containsEdge(path[idx], path[idx+1]);
+            idx++;
+        }
+        return satisfies;
     }
 }
