@@ -1,3 +1,7 @@
+/**
+ * Programmer: Chris Tralie
+ * Purpose: To solve the Hamiltonian cycle problem via reductions
+ */
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -1,3 +1,9 @@
+/**
+ * Programmer: Chris Tralie
+ * Purpose: To provide a basic CNF class, along with a vanilla
+ * implementation of a Davis-Putnam-Logemann-Loveland (DPLL) SAT solver
+ */
+
 import java.util.*;
 
 class CNF {
