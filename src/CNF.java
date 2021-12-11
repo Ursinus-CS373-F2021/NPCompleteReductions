@@ -314,7 +314,7 @@ class CNF {
                     }
                     idx--;
                     if (pureStatus[idx] == -1) {
-                        pureStatus[idx] = val?0:1;
+                        pureStatus[idx] = val?1:0;
                     }
                     else if (pure[idx]) {
                         if (val != (pureStatus[idx] == 1)) {
