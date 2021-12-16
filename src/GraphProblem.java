@@ -12,6 +12,22 @@ public class GraphProblem extends NPCompleteProblem {
     }
 
     /**
+     * Return number of vertices in the graph
+     * @return Number of vertices
+     */
+    public int getNumVertices() {
+        return N;
+    }
+
+    /**
+     * Return number of edges in the graph
+     * @return Number of edges
+     */
+    public int getNumEdges() {
+        return edges.size();
+    }
+
+    /**
      * Check to see whether an edge between two vertices 
      * exists in this class
      * @param i Index of first vertex
